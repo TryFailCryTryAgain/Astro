@@ -1,0 +1,50 @@
+---
+
+
+const FooterHeight = '50px';
+---
+
+
+<footer>
+    <button id="power-button">
+        <i class="fa-solid fa-power-off"></i>
+    </button>
+</footer>
+
+
+<style define:vars={{ Height: FooterHeight }}>
+
+    footer {
+        width: 100%;
+        height: var(--Height);
+        margin-top: auto;
+
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 0 1rem;
+
+        background-color: #aaa;
+    }
+
+    button {
+        height: var(--Height);
+        width: var(--Height);
+
+        font-size: 1.5rem;
+    }
+
+
+</style>
+
+<script>
+
+    const powerbutton = document.getElementById("power-button");
+
+    powerbutton?.addEventListener("click", function() {
+        // window.location.reload();
+        window.location.href = "https://google.com";
+    });
+
+
+</script>

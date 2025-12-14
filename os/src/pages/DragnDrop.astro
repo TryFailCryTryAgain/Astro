@@ -1,0 +1,116 @@
+---
+import DragLayout from "../layouts/DragLayout.astro";
+
+
+
+---
+
+<template>
+    <div class="container">
+
+    </div>
+</template>
+
+<DragLayout>
+
+    <section id="drag">
+
+    </section>
+
+</DragLayout>
+
+<script>
+    const template = document.querySelector("template");
+    const section = document.querySelector("#drag");
+    const body = document.querySelector("body");
+    
+    let isMouseDown = false;
+    let offsetX = 0;
+    let offsetY = 0;
+    let currentElement: HTMLElement | null = null;
+    let highestZIndex = 10;
+
+    function getRandomColor() {
+        let hue = Math.random() * 360;
+        let saturation = 50 + Math.random() * 50; // 50-100% for vibrant colors
+        let lightness = 40 + Math.random() * 30;  // 40-70% for visible colors
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    }
+
+    function AddTemplateToSection() {
+        if (!template || !section) {
+            return;
+        }
+
+        const clone = template.content.cloneNode(true) as DocumentFragment;
+        const ID = `window-${Date.now()}`;
+
+        const element = clone.firstElementChild as HTMLElement;
+        if (!element) {
+            return;
+        }
+
+        element.setAttribute("id", ID);
+        element.setAttribute("data-type", "Window");
+        element.style.backgroundColor = getRandomColor();
+        
+        section.appendChild(clone);
+    }
+
+    // Mouse down event - start dragging
+    body?.addEventListener("mousedown", function(e) {
+        const target = (e.target as HTMLElement).closest('[data-type="Window"]') as HTMLElement;
+        
+        if (target) {
+            e.preventDefault();
+            isMouseDown = true;
+            currentElement = target;
+            
+            highestZIndex++;
+            currentElement.style.zIndex = String(highestZIndex);
+            
+            offsetX = e.clientX - currentElement.offsetLeft;
+            offsetY = e.clientY - currentElement.offsetTop;
+        }
+    });
+
+    // Mouse move event - drag element
+    document.addEventListener("mousemove", function(e) {
+        if (isMouseDown && currentElement) {
+            currentElement.style.left = `${e.clientX - offsetX}px`;
+            currentElement.style.top = `${e.clientY - offsetY}px`;
+        }
+    });
+
+    // Mouse up event - stop dragging
+    document.addEventListener("mouseup", function() {
+        if (isMouseDown) {
+            isMouseDown = false;
+            currentElement = null;
+        }
+    });
+
+    window.addEventListener('create-new-template', AddTemplateToSection);
+
+</script>
+
+
+<style>
+
+
+    section {
+        height: 100%;
+        width: 100%;
+        position: relative;
+    }
+
+    .container {
+        height: 200px;
+        width: 600px;
+        position: absolute;
+
+    }
+
+
+
+</style>
