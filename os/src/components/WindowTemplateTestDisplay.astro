@@ -2,19 +2,28 @@
 
 ---
 
+    <!-- Context Menu for File button -->
+     <menu id="file-context-menu">
+        <li id="download-current-file">Export to PDF</li>
+        <li id="new-file">New File</li>
+    </menu>
+
+
+
+
     <!-- A NotePad window -->
     <div id="window" class="notepad-window">
         <header class="window-header">
             <div class="window-controls">
                 <div id="close-window-btn" class="window-control close"></div>
             </div>
-            <div class="window-title"><span contenteditable="true">Untitled</span> - Notepad</div>
+            <div class="window-title"><span id="file-title" contenteditable="true">Untitled</span> - Notepad</div>
         </header>
         
         <nav class="toolbar">
             <div class="menu-bar">
-                <span class="menu-item">File</span>
-                <span class="menu-item">Edit</span>
+                <span id="file-context" class="menu-item">File</span>
+                <span id="edit-context" class="menu-item">Edit</span>
                 <span class="menu-item">View</span>
                 <span class="menu-item">Format</span>
                 <span class="menu-item">Help</span>
@@ -54,18 +63,7 @@ Remember to save your work regularly!
 
 </textarea> -->
 
-<div contenteditable="true" class="text-editor"># Welcome to Notepad
-
-## This is a sample document.
-
-• You can write notes here
-• Format text using the toolbar
-• Save your work for later
-
-Current Time: 3:45 PM
-Date: 2023-10-27
-
-Remember to save your work regularly!
+<div id="file-text-content" contenteditable="true" class="text-editor"># Welcome to Notepad
 </div>
         </section>
         
@@ -77,6 +75,14 @@ Remember to save your work regularly!
             <div class="status-item">INS</div>
         </footer>
     </div>
+
+
+
+<!-- Hidden container for PDF export -->
+<div id="download-container" style="position: absolute; left: -9999px; top: 0;">
+    <div id="download-template" class="text-sheet-download">
+    </div>
+</div>
 
 
 <script>
@@ -176,8 +182,116 @@ Remember to save your work regularly!
         italicBtn?.classList.toggle('active', isItalic);
         underlineBtn?.classList.toggle('active', isUnderline);
     }
+
+
+
+// Context menu logic
+
+
+const FileContext = document.getElementById("file-context");
+const FileContextMenu = document.getElementById("file-context-menu");
+
+FileContext?.addEventListener("contextmenu", function(e) {
+    e.preventDefault();
+    // e.stopPropagation();
+
+    if (!FileContextMenu) {
+        console.log("missing");
+        return;
+    }
+
+    FileContextMenu.style.display = 'block';
+    FileContextMenu.style.left = e.pageX + 'px';
+    FileContextMenu.style.top = e.pageY + 'px';
+
+});
+
+
+// Add nulliferier regarding  context menus
+document.addEventListener("click", function() {
+
+    if (!FileContextMenu) {
+        return;
+    }
+
+    FileContextMenu.style.display = 'none';
+
+});
+
+
+
+
+
+
 </script>
 
+<!-- Script tag for reseting the file content -->
+<script>
+
+    const ResetFileBtn = document.getElementById("new-file");
+
+    if (ResetFileBtn) {
+
+        ResetFileBtn.addEventListener("click", function() {
+
+            const TextSheet = document.getElementById("file-text-content");
+
+            if (TextSheet) {
+
+                if (confirm("Are you sure you wanna reset your file?") === true) {
+                    TextSheet.textContent = "";
+                } else {
+                    return;
+                }
+            }
+        });
+    }
+
+</script>
+
+
+<!-- Script tag for downloading the current content of the notepad -->
+<script>
+    import html2pdf from 'html2pdf.js';
+
+    const DownloadBtn = document.getElementById("download-current-file");
+
+    DownloadBtn?.addEventListener("click", function() {
+
+        const TextSheet = document.getElementById("file-text-content");
+        const Template = document.getElementById("download-template");
+        const FileTitle = document.getElementById("file-title");
+        let DownloadTitle = "TestFile";
+        let FileExtention = ".pdf";
+
+        if (FileTitle) {
+            DownloadTitle = FileTitle.textContent;
+        }
+
+        if (!TextSheet || !Template) {
+            return;
+        }
+
+        Template.innerHTML =  TextSheet.innerHTML;
+
+        
+        const options = {
+            margin: 0,
+            filename: `${DownloadTitle}${FileExtention}`,
+            image: { type: "jpeg" as const },
+            html2canvas: { scale: 2 },
+            jsPDF: {
+                unit: 'mm' as const,
+                format: 'a4' as const,
+                orientation: 'portrait' as const
+            }
+        };
+
+        html2pdf().set(options).from(Template).save();
+
+    });
+
+</script>
 
 
 <style>
@@ -498,4 +612,73 @@ Remember to save your work regularly!
 .text-editor:focus ~ .focus-indicator {
     opacity: 1;
 }
+
+
+
+
+/* Context menu styling */
+
+
+menu {
+    display: none;
+
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 
+                0 4px 6px rgba(0, 0, 0, 0.05);
+    padding: 6px 0;
+    width: 220px;
+    list-style: none;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    user-select: none;
+    position: absolute;
+    z-index: 1000;
+}
+
+menu li {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    margin: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #374151;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+menu li:hover {
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    transform: translateX(2px);
+}
+
+menu li:active {
+    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+    transform: translateX(1px);
+}
+
+
+
+/* Download PDF styling */
+
+.text-sheet-download {
+    width: 794px;
+    height: 1123px;
+    background-color: #FFFFFF;
+    padding: 1rem;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Hide the download container */
+#download-container {
+    position: absolute;
+    left: -9999px;
+    pointer-events: none;
+    visibility: hidden;
+}
+
 </style>

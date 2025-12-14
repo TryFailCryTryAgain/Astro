@@ -9,6 +9,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.15.3"
+    "astro": "^5.15.3",
+    "html2pdf.js": "^0.12.1",
+    "jspdf": "^3.0.4"
   }
 }

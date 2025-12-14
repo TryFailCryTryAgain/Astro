@@ -1,0 +1,79 @@
+---
+import DownloadLayout from "../layouts/DownloadLayout.astro";
+---
+
+<DownloadLayout>
+    <div id="text-sheet" contenteditable="true" class="text-sheet">
+        <div>Place holder...</div>
+    </div>
+</DownloadLayout>
+
+<!-- Hidden container for PDF export -->
+<div id="download-container" style="position: absolute; left: -9999px; top: 0;">
+    <div id="download-template" class="text-sheet-download">
+    </div>
+</div>
+
+<script>
+    import html2pdf from 'html2pdf.js';
+
+    window.addEventListener("download", function() {
+        const TextSheet = document.getElementById("text-sheet");
+        const Template = document.getElementById("download-template");
+
+        if (!TextSheet || !Template) {
+            console.log("Error Downloading Page");
+            return;
+        }
+
+        // Copy content to the hidden download template
+        Template.innerHTML = TextSheet.innerHTML;
+
+        const options = {
+            margin: 0,
+            filename: 'NewTesting.pdf',
+            image: { type: "jpeg" as const },
+            html2canvas: { scale: 2 },
+            jsPDF: {
+                unit: 'mm' as const,
+                format: 'a4' as const,
+                orientation: 'portrait' as const  // Fixed typo: was 'orienation'
+            }
+        };
+
+        html2pdf().set(options).from(Template).save();
+    });
+</script>
+
+<style>
+    /* Responsive editing view */
+    .text-sheet {
+        width: 100%;
+        max-width: 800px;
+        min-height: 600px;
+        height: auto;
+        border: 1px solid #ccc;
+        background-color: #FAFAFA;
+        padding: 1rem;
+        box-sizing: border-box;
+        margin: 0 auto;
+    }
+
+    /* PDF export dimensions - hidden from view */
+    .text-sheet-download {
+        width: 794px;
+        height: 1123px;
+        background-color: #FFFFFF;
+        padding: 1rem;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    /* Hide the download container */
+    #download-container {
+        position: absolute;
+        left: -9999px;
+        pointer-events: none;
+        visibility: hidden;
+    }
+</style>

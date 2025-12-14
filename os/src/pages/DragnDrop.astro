@@ -7,6 +7,7 @@ import DragLayout from "../layouts/DragLayout.astro";
 
 <template>
     <div class="container">
+        <header></header>
 
     </div>
 </template>
@@ -59,15 +60,25 @@ import DragLayout from "../layouts/DragLayout.astro";
 
     // Mouse down event - start dragging
     body?.addEventListener("mousedown", function(e) {
-        const target = (e.target as HTMLElement).closest('[data-type="Window"]') as HTMLElement;
+        const target = e.target as HTMLElement;
         
-        if (target) {
+        // Find the window container
+        const windowElement = target.closest('[data-type="Window"]') as HTMLElement;
+        
+        // If clicked anywhere on the window, bring it to front
+        if (windowElement) {
+            highestZIndex++;
+            windowElement.style.zIndex = String(highestZIndex);
+        }
+        
+        // Check if the click is on a header
+        const header = target.tagName === 'HEADER' ? target : target.closest('header');
+        
+        // Only enable dragging if header was clicked
+        if (header && windowElement) {
             e.preventDefault();
             isMouseDown = true;
-            currentElement = target;
-            
-            highestZIndex++;
-            currentElement.style.zIndex = String(highestZIndex);
+            currentElement = windowElement;
             
             offsetX = e.clientX - currentElement.offsetLeft;
             offsetY = e.clientY - currentElement.offsetTop;
@@ -109,6 +120,12 @@ import DragLayout from "../layouts/DragLayout.astro";
         width: 600px;
         position: absolute;
 
+    }
+
+    .container header {
+        height: 50px;
+        width: 100%;
+        background-color: #ccc;
     }
 
 
